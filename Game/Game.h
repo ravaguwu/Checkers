@@ -20,11 +20,11 @@ class Game
     // to start checkers
     int play()
     {
-        // Запускаем часы длительности игры
+        // Start the game duration clock
         auto start = chrono::steady_clock::now();
         if (is_replay)
         {
-            // Если переигровка, то пересоздаём класс логики, перезагружаем конфиг и очищаем доску
+            // If there is a replay, then we recreate the logic class, reload the config and clear the board
             logic = Logic(&board, &config);
             config.reload();
             board.redraw();
@@ -38,19 +38,19 @@ class Game
         int turn_num = -1;
         bool is_quit = false;
         const int Max_turns = config("Game", "MaxNumTurns");
-        // Играем пока не набрано макс кол-во ходов
+        // We play until the maximum number of moves is reached.
         while (++turn_num < Max_turns)
         {
-            // Находим возможные ходы и если нет - завершаем
+            // We find possible moves and if not, we finish
             beat_series = 0;
             logic.find_turns(turn_num % 2);
             if (logic.turns.empty())
                 break;
-            // Устанавливаем максимлаьную глубину счёта
+            // Set the maximum count depth
             logic.Max_depth = config("Bot", string((turn_num % 2) ? "Black" : "White") + string("BotLevel"));
             if (!config("Bot", string("Is") + string((turn_num % 2) ? "Black" : "White") + string("Bot")))
             {
-                // Ожидаем ход и в зависимости от ответа делаем действие
+                // We wait for a move and take action depending on the answer
                 auto resp = player_turn(turn_num % 2);
                 if (resp == Response::QUIT)
                 {
@@ -64,7 +64,7 @@ class Game
                 }
                 else if (resp == Response::BACK)
                 {
-                    // Возвращаем на доске, в случае возврата
+                    // Return to the board, in case of return
                     if (config("Bot", string("Is") + string((1 - turn_num % 2) ? "Black" : "White") + string("Bot")) &&
                         !beat_series && board.history_mtx.size() > 2)
                     {
@@ -82,13 +82,13 @@ class Game
             else
                 bot_turn(turn_num % 2);
         }
-        // Записываем в лог-файл данные о длительности игры
+        // We write data about the duration of the game to the log file
         auto end = chrono::steady_clock::now();
         ofstream fout(project_path + "log.txt", ios_base::app);
         fout << "Game time: " << (int)chrono::duration<double, milli>(end - start).count() << " millisec\n";
         fout.close();
 
-        // Переигрываем или закрываем
+        // Replay or close
         if (is_replay)
             return play();
         if (is_quit)
@@ -102,7 +102,7 @@ class Game
         {
             res = 1;
         }
-        // Показываем счёт и ждём ответа
+        // We show the results and wait for a response
         board.show_final(res);
         auto resp = hand.wait();
         if (resp == Response::REPLAY)
@@ -114,7 +114,7 @@ class Game
     }
 
   private:
-    // Ожидаем ход бота, учитывая во внимание задержку перед ходом
+    // We wait for the bot to move and wait the delay before the move
     void bot_turn(const bool color)
     {
         auto start = chrono::steady_clock::now();
@@ -123,7 +123,7 @@ class Game
         // new thread for equal delay for each turn
         thread th(SDL_Delay, delay_ms);
 
-        // Находим лучший ход и делаем его
+        // We find the best move and make it
         auto turns = logic.find_best_turns(color);
         th.join();
         bool is_first = true;
@@ -139,14 +139,14 @@ class Game
             board.move_piece(turn, beat_series);
         }
 
-        // Записываем в лог длительность хода
+        // We write the duration of the move to the log
         auto end = chrono::steady_clock::now();
         ofstream fout(project_path + "log.txt", ios_base::app);
         fout << "Bot turn time: " << (int)chrono::duration<double, milli>(end - start).count() << " millisec\n";
         fout.close();
     }
 
-    // Ожидает ход игрока
+    // Waits for the player's turn
     Response player_turn(const bool color)
     {
         // return 1 if quit

@@ -2,14 +2,14 @@
 
 enum class Response
 {
-    // Успешно
+    // Succesful
     OK,
-    // Вернуть ход
+    // Return move back in this game
     BACK,
-    // Переигровка
+    // Replay this game
     REPLAY,
-    // Выход
+    // Quit from this game
     QUIT,
-    // Ход
+    // Move in this game again
     CELL
 };
