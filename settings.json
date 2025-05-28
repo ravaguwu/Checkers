@@ -1,19 +1,35 @@
 {
-    "WindowSize": {
-        "Width": 0,
-        "Hight": 0
-    },
-    "Bot": {
-        "IsWhiteBot": false,
-        "IsBlackBot": true,
-        "WhiteBotLevel": 0,
-        "BlackBotLevel": 5,
-        "BotScoringType": "NumberAndPotential",
-        "BotDelayMS": 0,
-        "NoRandom": false,
-        "Optimization": "O1"
-    },
-    "Game": {
-        "MaxNumTurns": 120
-    }
+  // Размер окна приложения
+  "WindowSize": {
+    // Ширина
+    // Если ноль, то берёт размер экрана
+    "Width": 0,
+    // Высота
+    // Если ноль, то берёт размер экрана
+    "Hight": 0
+  },
+  // Настройки бота
+  "Bot": {
+    // Играет ли за белый
+    "IsWhiteBot": false,
+    // Играет ли за чёрный
+    "IsBlackBot": true,
+    // Максимальная глубина счёта ходов за белых
+    "WhiteBotLevel": 0,
+    // Максимальная глубина счёта ходов за чёрных
+    "BlackBotLevel": 5,
+    // Тип подсчёта
+    "BotScoringType": "NumberAndPotential",
+    // Задержка перед ходом в мс
+    "BotDelayMS": 0,
+    // Случайно ли
+    "NoRandom": false,
+    // Тип оптимизации
+    "Optimization": "O1"
+  },
+  // Настройки игры
+  "Game": {
+    // Максимально ходов
+    "MaxNumTurns": 120
+  }
 }
