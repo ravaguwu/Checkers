@@ -21,11 +21,14 @@ class Logic
 
     vector<move_pos> find_best_turns(const bool color)
     {
+        // Clear previous ones
         next_best_state.clear();
         next_move.clear();
 
+        // Finding the best moves
         find_first_best_turn(board->get_board(), color, -1, -1, 0);
 
+        // Finding the best sequence of moves
         vector<move_pos> res;
         int current_index = 0;
         while (current_index != -1 && next_move[current_index].x != -1)
@@ -49,7 +52,7 @@ private:
         return mtx;
     }
 
-    // We count the score of the transferred checker positions
+    // We count the score of the given checker positions
     double calc_score(const vector<vector<POS_T>> &mtx, const bool first_bot_color) const
     {
         // color - who is max player
@@ -89,10 +92,12 @@ private:
     double find_first_best_turn(vector<vector<POS_T>> mtx, const bool color, const POS_T x, const POS_T y, size_t state,
         double alpha = -1)
     {
+        // Re init for current state
         next_best_state.push_back(-1);
         next_move.emplace_back(-1, -1, -1, -1);
         double best_score = -1;
 
+        // For current checker or for all
         if (state == 0) {
             find_turns(color, mtx);
         }
@@ -100,12 +105,15 @@ private:
             find_turns(x, y, mtx);
         }
 
+        // Save already finded turns
         auto turns_now = turns;
         bool have_beats_now = have_beats;
 
+        // Go deepter if it not combo
         if (!have_beats_now && state != 0)
             return find_best_turns_rec(mtx, 1 - color, 0, alpha);
 
+        // Finding the best one move in all possible
         for (auto turn : turns_now)
         {
             size_t next_state = next_move.size();
@@ -123,16 +131,20 @@ private:
                 next_move[state] = turn;
             }
         }
+
         return best_score;
     }
 
     double find_best_turns_rec(vector<vector<POS_T>> mtx, const bool color, const size_t depth, double alpha = -1,
         double beta = INF + 1, const POS_T x = -1, const POS_T y = -1)
     {
+        // If max depth, we will calcute total score
         if (depth == Max_depth)
         {
             return calc_score(mtx, (depth % 2 == color));
         }
+
+        // For only one checker or for all
         if (x != -1)
         {
             find_turns(x, y, mtx);
@@ -140,39 +152,48 @@ private:
         else
             find_turns(color, mtx);
 
+        // Save already finded turns
         auto turns_now = turns;
         bool have_beats_now = have_beats;
 
+        // Go deeper if it not combo
         if (!have_beats_now && x != -1)
         {
             return find_best_turns_rec(mtx, 1 - color, depth + 1, alpha, beta);
         }
 
+        //If empty, return calcutiong
         if (turns.empty())
             return (depth % 2 == color % 2) ? 0 : INF;
 
+        // Min scores
         double min_score = INF + 1;
         double max_score = -1;
         for (auto turn : turns_now)
         {
+            // Score of current move
             double score;
+
+            // Go deeper if it not combo
             if (!have_beats_now && x == -1)
             {
                 score = find_best_turns_rec(make_turn(mtx, turn), 1 - color, depth + 1, alpha, beta);
             }
             else
             {
+                // Otherwise current
                 score = find_best_turns_rec(make_turn(mtx, turn), color, depth, alpha, beta, turn.x2, turn.y2);
             }
 
             min_score = min(min_score, score);
             max_score = max(max_score, score);
 
-            if (depth % 2)
+            if (depth % 2) // Max move
                 alpha = max(alpha, max_score);
-            else
+            else // Min move
                 beta = min(beta, min_score);
 
+            // If optimization we will cut
             if (optimization != "O0" && alpha >= beta)
                 return (depth % 2) ? beta : alpha;
         }
